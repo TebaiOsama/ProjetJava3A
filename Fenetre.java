@@ -57,14 +57,14 @@ public class Fenetre  extends JFrame{
 		JMenuBar mb = new JMenuBar();
 		
 		JMenu menu = new JMenu("Menu");
-		JMenu submenu = new JMenu("Difficulté");
+		JMenu submenu = new JMenu("DifficultÃ©");
 		
-		JMenuItem s1 = new JMenuItem("Debutant");  //submenus pour les difficultés
-		JMenuItem s2 = new JMenuItem("Avancé"); 
+		JMenuItem s1 = new JMenuItem("Debutant");  //submenus pour les difficultÃ©s
+		JMenuItem s2 = new JMenuItem("AvancÃ©"); 
 		JMenuItem s3 = new JMenuItem("Expert"); 
 		JMenuItem m1 = new JMenuItem("Quitter"); 
 		
-		s1.addActionListener(new ActionListener() { //les differentes difficultés se differencient par le nombre de cases qu'on remet à 0
+		s1.addActionListener(new ActionListener() { //les differentes difficultÃ©s se differencient par le nombre de cases qu'on remet Ã  0
 	        public void actionPerformed(ActionEvent ev) {	        	
 	        	diff=24;
 	        }
@@ -107,7 +107,7 @@ public class Fenetre  extends JFrame{
 		pr1.add(lbl);
 		add(pr1);
 		
-	    NumberFormat format = NumberFormat.getInstance(); //On créé un format a utiliser sur la grille
+	    NumberFormat format = NumberFormat.getInstance(); //On crÃ©Ã© un format a utiliser sur la grille
 	    NumberFormatter formatter = new NumberFormatter(format);
 	    formatter.setValueClass(Integer.class);
 	    formatter.setMinimum(1);
@@ -120,7 +120,7 @@ public class Fenetre  extends JFrame{
 		
 		add(pr3, BorderLayout.SOUTH);
 		
-		JButton start = new JButton("Démarrer"); //bouton qui demarre le jeu
+		JButton start = new JButton("DÃ©marrer"); //bouton qui demarre le jeu
 		start.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) { 
@@ -131,14 +131,14 @@ public class Fenetre  extends JFrame{
 				setJMenuBar(null);
 				JPanel pr1 = new JPanel(new GridLayout(9,9));
 				titre.setBorder(new EmptyBorder(10, 10, 10, 10));	
-				add(remplissageGrille(formatter, pr1), BorderLayout.CENTER);
+				add(remplissageGrille(formatter, pr1, false), BorderLayout.CENTER);
 				pr3.remove(start);
 				pr3.setBorder(new EmptyBorder(10, 10, 10, 10));			
-				JButton restart = new JButton("Récommencer"); //demander si cette partie ou une autre
+				JButton restart = new JButton("RÃ©commencer"); //demander si cette partie ou une autre
 				restart.addActionListener(new ActionListener(){
 					@Override
 					public void actionPerformed(ActionEvent arg0) { 					
-						Object[] options = {"Nouvelle partie","Récommencer"};
+						Object[] options = {"Nouvelle partie","RÃ©commencer"};
 						int n = JOptionPane.showOptionDialog(frame,
 						    "Voulez vous commencer une nouvelle partie, ou recommencer celle-ci ?",
 						    "Attention",
@@ -151,11 +151,11 @@ public class Fenetre  extends JFrame{
 							dispose();
 							new Fenetre();			
 						}
-						else if(n==1) { //Pour recommencer une partie, on remet les aides à 3 et on remplit à nouveau la grille
+						else if(n==1) { //Pour recommencer une partie, on remet les aides Ã  3 et on remplit Ã  nouveau la grille
 							nAide=3;
 							remove(pr1);
 							JPanel pr1 = new JPanel(new GridLayout(9,9));		
-							add(remplissageGrille(formatter, pr1), BorderLayout.CENTER);
+							add(remplissageGrille(formatter, pr1,false), BorderLayout.CENTER);
 							pr1.revalidate();
 							pr1.repaint();
 							revalidate();
@@ -174,7 +174,8 @@ public class Fenetre  extends JFrame{
 				JButton valider = new JButton("Valider"); //verifier si c'est complet, et dire si c'est tout bon ou pas
 				valider.addActionListener(new ActionListener(){
 					@Override
-					public void actionPerformed(ActionEvent arg0) {			
+					public void actionPerformed(ActionEvent arg0) {		
+						
 						if(isFinished(fieldMap)) {
 							int counter=0;
 							boolean isCorrect=true;
@@ -189,11 +190,47 @@ public class Fenetre  extends JFrame{
 							if(isCorrect)
 								JOptionPane.showMessageDialog(null, "Votre solution est correcte !");
 							else
-								JOptionPane.showMessageDialog(null, "Tentez à nouveau !");
+								JOptionPane.showMessageDialog(null, "Tentez Ã  nouveau !");
 
 						}
-						else
-							JOptionPane.showMessageDialog(null, "Vous n'avez pas remplit toutes vos cases !");
+						else {
+							Object[] options = {"Oui","Non"};
+							if(nAide>0) {
+								int n = JOptionPane.showOptionDialog(frame,
+									    "Vous n'avez pas fini de completer votre grille. Voulez-vous utiliser un aide ("+ nAide+" restant"+ (nAide==1?"":"s") +") pour savoir si vous etes sur la bonne route ?",
+									    "",
+									    JOptionPane.YES_NO_CANCEL_OPTION,
+									    JOptionPane.QUESTION_MESSAGE,
+									    null,
+									    options,
+									    options[1]);
+							
+								if(n==0) {
+									int counter=0;
+									boolean isGoingGood=true;
+									for(int i=0; i<9;i++) {
+										for(int j=0; j<9; j++) {
+											if(fieldMap.get(String.valueOf(counter)).getText().length()==1) {
+												if(!Objects.equals(String.valueOf(sudoku.sol[i][j]), fieldMap.get(String.valueOf(counter)).getText())) {
+													isGoingGood=false;	
+													System.out.println(String.valueOf(sudoku.sol[i][j]) + " "+fieldMap.get(String.valueOf(counter)).getText());
+												}
+											}
+											counter++;	
+										}
+									}
+									if(isGoingGood)
+										JOptionPane.showMessageDialog(null, "Pour l'instant tout est bon !");
+									else
+										JOptionPane.showMessageDialog(null, "Vous avez commis des erreurs !");
+									nAide--;
+								}
+								
+							}
+							else {
+								JOptionPane.showMessageDialog(null, "Vous n'avez pas completÃ© la grille, et vous n'avez plus de aides !");
+							}
+						}
 					}
 				});
 				
@@ -210,7 +247,24 @@ public class Fenetre  extends JFrame{
 					public void actionPerformed(ActionEvent arg0) { 
 						Object[] options = {"Oui","Non"};
 						if(nAide==0) {
-							JOptionPane.showMessageDialog(null, "Vous n'avez aucun aide restant.");
+							int n = JOptionPane.showOptionDialog(frame,
+								    "Vous n'avez aucun aide restant. Voulez vous renoncer Ã  la partie ?",
+								    "",
+								    JOptionPane.YES_NO_CANCEL_OPTION,
+								    JOptionPane.QUESTION_MESSAGE,
+								    null,
+								    options,
+								    options[1]);
+							if(n==0) {
+								remove(pr1);
+								JPanel pr1 = new JPanel(new GridLayout(9,9));
+								add(remplissageGrille(formatter, pr1, true), BorderLayout.CENTER);
+								pr1.revalidate();
+								pr1.repaint();
+								
+								revalidate();
+								repaint();
+							}
 						}
 						else {
 							int n = JOptionPane.showOptionDialog(frame,
@@ -272,24 +326,32 @@ public class Fenetre  extends JFrame{
 		repaint();	
 	}
 	
-	public JPanel remplissageGrille(NumberFormatter formatter, JPanel pr1) {
+	public JPanel remplissageGrille(NumberFormatter formatter, JPanel pr1, boolean isSol) {
 		int counter=0;
 	    fieldMap = new HashMap<String, JTextField>();
 		for(int i=0; i<9; i++) {
 			for(int j=0; j<9; j++) {
 				JTextField txt = new JFormattedTextField(formatter);
 				
-				if(sudoku.getGrille()[i][j]==0) {
-					
-					txt.setText(" ");
-					txt.setName("CaseVide");
-					txt.setFont(new Font("Arial", Font.PLAIN, 22));
-					txt.setEditable(true);
+				if(!isSol) {
+					if(sudoku.getGrille()[i][j]==0) {
+						
+						txt.setText("");
+						txt.setName("CaseVide");
+						txt.setFont(new Font("Arial", Font.PLAIN, 22));
+						txt.setEditable(true);
+					}
+					else {
+						txt.setText(String.valueOf(sudoku.getGrille()[i][j]));
+						txt.setFont(new Font("Arial", Font.BOLD, 22));
+						txt.setEditable(false);
+					}
 				}
 				else {
-					txt.setText(String.valueOf(sudoku.getGrille()[i][j]));
+					txt.setText(String.valueOf(sudoku.getSolution()[i][j]));
 					txt.setFont(new Font("Arial", Font.BOLD, 22));
 					txt.setEditable(false);
+
 				}
 				
 				if(j%3==0) {
@@ -328,7 +390,6 @@ public class Fenetre  extends JFrame{
 				}
 				else
 					txt.setBorder(new MatteBorder(1, 1, 1, 1, Color.BLACK));
-				//txt.setBorder(BorderFactory.createLineBorder(Color.black, 1)); 
 				pr1.setBorder(new MatteBorder(3,3,3,3, Color.BLACK)); 
 				
 				fieldMap.put(String.valueOf(counter), txt);
@@ -358,7 +419,6 @@ public class Fenetre  extends JFrame{
 	
 	
 	public static void main(String[] args){ 
-		//System.out.print(3%3);
 		Fenetre fen = new Fenetre();
 	}
 }
